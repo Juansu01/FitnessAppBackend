@@ -9,7 +9,7 @@ import {
 import { QueryFailedError } from 'typeorm';
 
 import { User } from '../entities/user/user.entity';
-import { CreateUser } from './dtos/create-user.dto';
+import { CreateUserDTO } from './dtos/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -26,7 +26,7 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  async create(user: CreateUser): Promise<User> {
+  async create(user: CreateUserDTO): Promise<User> {
     try {
       const newUser = this.userRepository.create(user);
       await this.userRepository.save(newUser);
