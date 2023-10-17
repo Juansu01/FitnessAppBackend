@@ -2,7 +2,7 @@ import { IsEmail, IsNotEmpty, IsString, IsEnum } from 'class-validator';
 
 import { UserType } from 'src/entities/user/enums/user-type.enum';
 
-export class CreateUser {
+export class CreateUserDTO {
   @IsString()
   @IsNotEmpty()
   fullName: string;
