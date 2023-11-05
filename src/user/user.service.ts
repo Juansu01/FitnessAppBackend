@@ -1,17 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  NotImplementedException,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { QueryFailedError } from 'typeorm';
 
 import { User } from '../entities/user/user.entity';
 import { Trainee } from '../entities/trainee/trainee';
-import { CreateUserDTO } from './dtos/create-user.dto';
+import { Trainer } from '../entities/trainer/trainer';
 import { CreateTraineeDTO } from './dtos/create-trainee.dto';
+import { CreateTrainerDTO } from './dtos/create-trainer.dto';
 import { UserType } from 'src/entities/user/enums/user-type.enum';
 
 @Injectable()
@@ -21,6 +16,8 @@ export class UserService {
     private userRepository: Repository<User>,
     @InjectRepository(Trainee)
     private traineeRepository: Repository<Trainee>,
+    @InjectRepository(Trainer)
+    private trainerRepository: Repository<Trainer>,
   ) {}
 
   async findOne(id: string): Promise<User | null> {
@@ -42,6 +39,21 @@ export class UserService {
 
     await this.userRepository.save(newUser);
     await this.traineeRepository.save(newTrainee);
+
+    return newUser;
+  }
+
+  async createTrainer(user: CreateTraineeDTO): Promise<User> {
+    const newUser = this.userRepository.create({
+      ...user,
+      userType: UserType.TRAINER,
+    });
+    const newTrainer = this.traineeRepository.create();
+
+    newTrainer.user = newUser;
+
+    await this.userRepository.save(newUser);
+    await this.trainerRepository.save(newTrainer);
 
     return newUser;
   }
