@@ -21,4 +21,9 @@ export class UserController {
   getOneTrainee(@Param('id') id: string) {
     return this.userService.findTrainee(id);
   }
+
+  @Get('trainers/:id')
+  getOneTrainer(@Param('id') id: string) {
+    return this.userService.findTrainer(id);
+  }
 }

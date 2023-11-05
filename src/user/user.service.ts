@@ -72,4 +72,19 @@ export class UserService {
 
     return trainee;
   }
+
+  async findTrainer(id: string): Promise<Trainer | null> {
+    const trainer = await this.trainerRepository.findOne({
+      where: {
+        user: {
+          id,
+        },
+      },
+      relations: {
+        trainees: true,
+      },
+    });
+
+    return trainer;
+  }
 }
