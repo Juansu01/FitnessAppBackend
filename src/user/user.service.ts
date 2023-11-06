@@ -28,12 +28,12 @@ export class UserService {
     return this.userRepository.find({});
   }
 
-  async createTrainee(user: CreateTrainerDTO): Promise<User> {
+  async createTrainee(user: CreateTraineeDTO): Promise<User> {
     const newUser = this.userRepository.create({
       ...user,
       userType: UserType.TRAINEE,
     });
-    const newTrainee = this.traineeRepository.create();
+    const newTrainee = this.traineeRepository.create(user);
 
     newTrainee.user = newUser;
 
@@ -43,12 +43,12 @@ export class UserService {
     return newUser;
   }
 
-  async createTrainer(user: CreateTraineeDTO): Promise<User> {
+  async createTrainer(user: CreateTrainerDTO): Promise<User> {
     const newUser = this.userRepository.create({
       ...user,
       userType: UserType.TRAINER,
     });
-    const newTrainer = this.traineeRepository.create();
+    const newTrainer = this.traineeRepository.create(user);
 
     newTrainer.user = newUser;
 
