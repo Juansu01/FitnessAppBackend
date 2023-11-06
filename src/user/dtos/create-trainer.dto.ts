@@ -17,4 +17,8 @@ export class CreateTrainerDTO {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  gender: string;
 }

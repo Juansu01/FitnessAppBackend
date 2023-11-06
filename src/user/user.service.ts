@@ -28,7 +28,7 @@ export class UserService {
     return this.userRepository.find({});
   }
 
-  async createTrainee(user: CreateTraineeDTO): Promise<User> {
+  async createTrainee(user: CreateTrainerDTO): Promise<User> {
     const newUser = this.userRepository.create({
       ...user,
       userType: UserType.TRAINEE,
