@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { BadRequestException } from '@nestjs/common';
 
 import { User } from '../entities/user/user.entity';
 import { Trainee } from '../entities/trainee/trainee';
@@ -29,6 +30,11 @@ export class UserService {
   }
 
   async createTrainee(user: CreateTraineeDTO): Promise<User> {
+    const userExists = await this.checkExistingUser(user.email);
+
+    if (userExists)
+      throw new BadRequestException(`Email: ${user.email} is already taken.`);
+
     const newUser = this.userRepository.create({
       ...user,
       userType: UserType.TRAINEE,
@@ -44,6 +50,11 @@ export class UserService {
   }
 
   async createTrainer(user: CreateTrainerDTO): Promise<User> {
+    const userExists = await this.checkExistingUser(user.email);
+
+    if (userExists)
+      throw new BadRequestException(`Email: ${user.email} is already taken.`);
+
     const newUser = this.userRepository.create({
       ...user,
       userType: UserType.TRAINER,
@@ -86,5 +97,16 @@ export class UserService {
     });
 
     return trainer;
+  }
+
+  async findUserByEmail(email: string): Promise<User | null> {
+    const user = await this.userRepository.findOneBy({ email });
+    return user;
+  }
+
+  async checkExistingUser(email: string): Promise<boolean> {
+    const existingUser = await this.findUserByEmail(email);
+
+    return existingUser !== null;
   }
 }
