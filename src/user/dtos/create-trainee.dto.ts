@@ -1,4 +1,12 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
+
+import { TraineeLevel } from 'src/entities/trainee/enums/trainee-level.enum';
 
 export class CreateTraineeDTO {
   @IsString()
@@ -25,4 +33,8 @@ export class CreateTraineeDTO {
   @IsNotEmpty()
   @IsString()
   gender: string;
+
+  @IsEnum(TraineeLevel)
+  @IsNotEmpty()
+  level: string;
 }
