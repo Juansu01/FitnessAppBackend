@@ -15,7 +15,7 @@ export class AuthController {
   }
 
   @Post('register/trainer')
-  registerTrainer(@Body() newTrainee: CreateTrainerDTO) {
-    return this.userService.createTrainee(newTrainee);
+  registerTrainer(@Body() newTrainer: CreateTrainerDTO) {
+    return this.userService.createTrainee(newTrainer);
   }
 }
