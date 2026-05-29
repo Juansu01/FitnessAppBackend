@@ -1,62 +1,63 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { AuthProvider } from './auth.provider';
-import { CreateUserDto } from '../users/dtos/create-user.dto';
-import { ConfigService } from '@nestjs/config';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 import { LoginDto } from './dtos/login.dto';
+import { UsersService } from 'users/users.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private authProvider: AuthProvider,
-    private configService: ConfigService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async initiateSignUp(createUserDto: CreateUserDto) {
-    const { email, firstName, lastName } = createUserDto;
+  async createAccessToken(payload: {
+    sub: string;
+    firstName: string;
+    lastName: string;
+  }) {
+    const token = await this.jwtService.signAsync(payload);
 
-    try {
-      await this.authProvider.authenticationClient.passwordless.sendEmail({
-        email,
-        send: 'code',
-      });
-
-      return {
-        message: 'Verification code sent successfully',
-        user: { email, name: `${firstName} ${lastName}` },
-      };
-    } catch (error) {
-      console.error(`Failed to initiate sign up: ${error}`);
-
+    if (typeof token !== 'string') {
       throw new HttpException(
-        'Failed to initiate sign up',
+        'Invalid token type received',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+
+    return token;
   }
 
-  async completeLogin(loginDto: LoginDto) {
-    const { email, otp } = loginDto;
+  async logIn(loginDto: LoginDto) {
+    const { email, password: passwordGuess } = loginDto;
 
-    try {
-      const tokens =
-        await this.authProvider.authenticationClient.passwordless.loginWithEmail(
-          {
-            email,
-            code: otp,
-            audience: this.configService.getOrThrow('AUTH0_AUDIENCE'),
-            scope: 'openid profile email',
-          },
-        );
+    const user = await this.usersService.findOne({ where: { email } });
 
-      return tokens;
-    } catch (error) {
-      console.error(error);
-
-      throw new HttpException(
-        'Could not complete login',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
+
+    const match = await bcrypt.compare(passwordGuess, user.password);
+
+    if (!match) {
+      throw new UnauthorizedException();
+    }
+
+    const payload = {
+      sub: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
+    const accessToken = await this.jwtService.signAsync(payload);
+
+    return {
+      accessToken,
+    };
   }
 }

@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+
 import { AuthService } from 'auth/auth.service';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -31,19 +32,15 @@ export class UsersController {
       throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
     }
 
-    try {
-      const newUser = await this.usersService.create(createUserDto);
-      console.log({ message: 'User created successfully', user: newUser });
-    } catch (error) {
-      console.error('UsersController createUser method error', error);
+    const newUser = await this.usersService.create(createUserDto);
 
-      throw new HttpException(
-        'Error creating user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const payload = {
+      sub: newUser.id.toString(),
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+    };
 
-    return this.authService.initiateSignUp(createUserDto);
+    return this.authService.createAccessToken(payload);
   }
 
   @Get()
